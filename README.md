@@ -166,6 +166,24 @@ critical-reviewer-skill/
 
 English and Polish. Direct technical critique in both. Language auto-detected from user input.
 
+## Contributing
+
+Contributions are welcome. To get started:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-change`)
+3. Make your changes — follow the same artifact-focused, direct style used in the skill itself
+4. Submit a pull request with a clear description of what changed and why
+
+**What makes a good PR:**
+- Changes to quality standards or anti-patterns should include a rationale
+- New trigger phrases should cover a real user intent, not just synonyms
+- Keep the skill and agent self-consistent — if you update the verdict scale in one, update it in both
+
+**Issues and ideas:** Open an issue on GitHub. Bug reports, feature requests, and suggestions for new quality standards are all welcome.
+
 ## License
 
-MIT — free to use, modify, and distribute.
+This project is licensed under the [MIT License](LICENSE).
+
+Permission is hereby granted, free of charge, to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this software. See the LICENSE file for full terms.
