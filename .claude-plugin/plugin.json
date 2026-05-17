@@ -1,0 +1,12 @@
+{
+  "name": "critical-reviewer",
+  "version": "2.0.0",
+  "description": "Direct, artifact-focused code review and architecture critique. Opens with the most important issue first. Professional but uncompromising.",
+  "author": {
+    "name": "Konrad Dzbik",
+    "url": "https://github.com/konraddzbik"
+  },
+  "repository": "https://github.com/konraddzbik/critical-reviewer-skill",
+  "license": "MIT",
+  "keywords": ["code-review", "architecture", "quality", "critique"]
+}
