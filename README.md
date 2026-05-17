@@ -18,36 +18,30 @@ A Claude Code plugin for direct, artifact-focused code review and architecture c
 
 ### Option A: Install as a plugin (recommended)
 
-Inside Claude Code, run:
-
-```
 /plugin install https://github.com/konraddzbik/critical-reviewer-skill.git
-```
-
-Or add the marketplace first and install by name:
+Inside Claude Code, add this repo as a marketplace and install:
 
 ```
 /plugin marketplace add konraddzbik/critical-reviewer-skill
-/plugin install critical-reviewer@konraddzbik
+/plugin install critical-reviewer
 ```
 
-Both methods register the skill and the agent. They're available in every project from that point on.
+This registers the skill and the agent. They're available in every project from that point on.
 
 ### Option B: Test locally before installing
 
-In your terminal:
+Clone and load as a local plugin for one session:
 
 ```bash
 git clone https://github.com/konraddzbik/critical-reviewer-skill.git
-```
-
-Then start Claude Code with the plugin directory:
-
-```bash
 claude --plugin-dir ./critical-reviewer-skill
 ```
 
 The skill and agent are active for that session only. Install with Option A when satisfied.
+
+### Verify installation
+
+After installing, type `/critical-reviewer` inside Claude Code — the skill should appear in the list. To test the agent, say "review this code" in a project with source files.
 
 ### Option C: Copy into your project (no plugin system)
 
@@ -164,12 +158,10 @@ critical-reviewer-skill/
 
 ## Sharing with your team
 
-**Direct install:** Run `/plugin install https://github.com/konraddzbik/critical-reviewer-skill.git` inside Claude Code.
-
-**Via marketplace:** Team members add the marketplace once, then install by name:
+**Via marketplace (recommended):** Team members add the marketplace once, then install by name:
 ```
 /plugin marketplace add konraddzbik/critical-reviewer-skill
-/plugin install critical-reviewer@konraddzbik
+/plugin install critical-reviewer
 ```
 
 **Fork (for customization):** Fork this repo, adjust skill/agent/quality-standards to your team's conventions, install from your fork URL.
