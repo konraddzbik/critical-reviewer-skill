@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "critical-reviewer",
-      "source": ".",
+      "source": "./",
       "description": "Direct, artifact-focused code review and architecture critique. Skill for communication style + agent for structured code review. Professional but uncompromising."
     }
   ]
