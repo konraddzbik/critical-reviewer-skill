@@ -24,7 +24,14 @@ Inside Claude Code, run:
 /plugin install https://github.com/konraddzbik/critical-reviewer-skill.git
 ```
 
-This registers both the skill and the agent. They're available in every project from that point on.
+Or add the marketplace first and install by name:
+
+```
+/plugin marketplace add konraddzbik/critical-reviewer-skill
+/plugin install critical-reviewer@konraddzbik
+```
+
+Both methods register the skill and the agent. They're available in every project from that point on.
 
 ### Option B: Test locally before installing
 
@@ -143,7 +150,8 @@ This tells Claude to invoke the skill immediately, so even building and debuggin
 ```
 critical-reviewer-skill/
 ├── .claude-plugin/
-│   └── plugin.json                  # plugin manifest
+│   ├── plugin.json                  # plugin manifest
+│   └── marketplace.json             # marketplace registry
 ├── skills/
 │   └── critical-reviewer/
 │       ├── SKILL.md                 # persona + communication style + quality rules
@@ -156,11 +164,15 @@ critical-reviewer-skill/
 
 ## Sharing with your team
 
-**Plugin install (recommended):** Run `/plugin install https://github.com/konraddzbik/critical-reviewer-skill.git` inside Claude Code.
+**Direct install:** Run `/plugin install https://github.com/konraddzbik/critical-reviewer-skill.git` inside Claude Code.
+
+**Via marketplace:** Team members add the marketplace once, then install by name:
+```
+/plugin marketplace add konraddzbik/critical-reviewer-skill
+/plugin install critical-reviewer@konraddzbik
+```
 
 **Fork (for customization):** Fork this repo, adjust skill/agent/quality-standards to your team's conventions, install from your fork URL.
-
-**Team marketplace (for organizations):** Host a `marketplace.json` listing this plugin. Team members add the marketplace once, then install by name.
 
 ## Languages
 

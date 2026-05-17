@@ -1,0 +1,14 @@
+{
+  "name": "critical-reviewer-skill",
+  "owner": {
+    "name": "Konrad Dzbik",
+    "url": "https://github.com/konraddzbik"
+  },
+  "plugins": [
+    {
+      "name": "critical-reviewer",
+      "source": ".",
+      "description": "Direct, artifact-focused code review and architecture critique. Skill for communication style + agent for structured code review. Professional but uncompromising."
+    }
+  ]
+}
