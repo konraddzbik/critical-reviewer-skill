@@ -18,7 +18,6 @@ A Claude Code plugin for direct, artifact-focused code review and architecture c
 
 ### Option A: Install as a plugin (recommended)
 
-/plugin install https://github.com/konraddzbik/critical-reviewer-skill.git
 Inside Claude Code, add this repo as a marketplace and install:
 
 ```
