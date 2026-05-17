@@ -1,132 +1,142 @@
 # critical-reviewer
 
-A Claude Code plugin for direct, artifact-focused code review and architecture critique. Professional but uncompromising — critiques the code, not the person.
+A cross-platform Claude Skill, GitHub Copilot CLI Skill, and OpenCode Skill for direct, artifact-focused code review and architecture critique. Professional but uncompromising — critiques the code, not the person.
 
-## Components
+This is a [Claude Skill](https://github.com/anthropics/skills) — a folder of instructions the AI loads on demand. When you ask for a critical review, this skill takes over with direct, structured feedback.
+
+---
+
+## What you get
 
 | Component | Type | What it does |
 |---|---|---|
 | `/critical-reviewer` | **Skill** | Communication style — opens with the most important finding. Direct, artifact-focused, bilingual (EN/PL). |
 | `code-reviewer` | **Agent** | Focused code review — reads the codebase, applies quality standards, produces a structured verdict. Read-only. |
 
-**Skill** = persona that shapes how Claude communicates. Lazy-loaded on first trigger, then stays active for the rest of the session.
+**Skill** = persona that shapes how the AI communicates. Lazy-loaded on first trigger, then stays active for the rest of the session.
 **Agent** = focused subprocess for code review. Spawns in its own context, returns structured results, never modifies files.
 
-## Installation
+---
 
-> All commands below that start with `/` are **Claude Code slash commands** — run them inside a Claude Code session (CLI, desktop app, or IDE extension), not in a regular terminal.
+## When to use this skill
 
-### Option A: Install as a plugin (recommended)
+| Situation | Use this? |
+|---|---|
+| "Review this PR" | **Yes** |
+| "Critique this architecture" | **Yes** |
+| "Is this solution correct?" | **Yes** |
+| "What am I missing?" | **Yes** |
+| "be direct" / "bez ściemy" | **Yes** |
+| "check this idea" | **Yes** |
+| Writing code / building features | No — normal AI behavior applies |
 
-Inside Claude Code, add this repo as a marketplace and install:
+---
 
-```
+## Install
+
+### Claude Code — Plugin Marketplace (recommended)
+
+```bash
 /plugin marketplace add konraddzbik/critical-reviewer-skill
 /plugin install critical-reviewer
 ```
 
-This registers the skill and the agent. They're available in every project from that point on.
+That's it. The skill activates automatically whenever you ask for a review.
 
-### Option B: Test locally before installing
+### Claude Code — manual clone
 
-Clone and load as a local plugin for one session:
-
-```bash
-git clone https://github.com/konraddzbik/critical-reviewer-skill.git
-claude --plugin-dir ./critical-reviewer-skill
-```
-
-The skill and agent are active for that session only. Install with Option A when satisfied.
-
-### Verify installation
-
-After installing, type `/critical-reviewer` inside Claude Code — the skill should appear in the list. To test the agent, say "review this code" in a project with source files.
-
-### Option C: Copy into your project (no plugin system)
-
-Copy the skill and agent files into your project's `.claude/` directory:
+Personal install (available in all your projects):
 
 ```bash
-# From this repo's root
-mkdir -p your-project/.claude/skills/critical-reviewer/references
-mkdir -p your-project/.claude/agents
-
-cp skills/critical-reviewer/SKILL.md your-project/.claude/skills/critical-reviewer/
-cp skills/critical-reviewer/references/quality-standards.md your-project/.claude/skills/critical-reviewer/references/
-cp agents/code-reviewer.md your-project/.claude/agents/
+git clone https://github.com/konraddzbik/critical-reviewer-skill \
+  ~/.claude/skills/critical-reviewer
 ```
 
-Result:
+Project install (committed to a repo, shared with your team):
 
-```
-your-project/
-├── CLAUDE.md                           # your project's CLAUDE.md (see Mode 2 below for always-on snippet)
-└── .claude/
-    ├── skills/
-    │   └── critical-reviewer/
-    │       ├── SKILL.md
-    │       └── references/
-    │           └── quality-standards.md
-    └── agents/
-        └── code-reviewer.md
+```bash
+git clone https://github.com/konraddzbik/critical-reviewer-skill \
+  .claude/skills/critical-reviewer
 ```
 
-This works without the plugin system. The skill and agent are scoped to that project only. The `CLAUDE.md` shown above is YOUR project's file — not one from this repo.
+### GitHub Copilot CLI
 
-## Usage modes
+Requires [GitHub CLI](https://cli.github.com/) ≥ 2.90.0:
 
-### Mode 1: On-demand (default after install)
-
-After installing, the skill and agent are **available but not always active**:
-
-- **Skill fires** when you say things like "review this", "be direct", "critique this", "co jest nie tak" — or when you type `/critical-reviewer` manually
-- **Agent fires** when Claude detects a focused review task ("review this PR", "what's wrong with this code")
-- **Normal coding** uses standard Claude behavior until something triggers the skill or agent
-
-Once the skill fires, it stays loaded for the rest of the session — every subsequent response uses the direct, artifact-focused style.
-
-### Mode 2: Always-on persona
-
-If you want the direct style on **every** response from session start, add this to your project's `CLAUDE.md`:
-
-```markdown
-## Active Skills
-
-### critical-reviewer (always active)
-
-Always use the critical-reviewer skill's communication style. Load it at the
-start of every session. It is not optional.
-
-Key behaviors:
-- Every response opens with the most important finding. No exceptions.
-- Critique in the language the user writes in. Polish → Polish. English → English.
-- Underspecified requests get called out for missing context, then answered anyway.
-- Bad decisions get flagged even if the team already agreed on them.
-- Good code gets clear, unqualified acknowledgment.
+```bash
+gh skill install konraddzbik/critical-reviewer-skill critical-reviewer
 ```
 
-This tells Claude to invoke the skill immediately, so even building and debugging work uses the critical-reviewer style.
+The skill is installed to `.github/skills/` in your current project by default. To install it globally for all projects:
 
-### When does what fire?
+```bash
+gh skill install konraddzbik/critical-reviewer-skill critical-reviewer --scope user
+```
 
-| You're doing | Skill | Agent |
-|---|---|---|
-| Writing code, building features | Only if already loaded or CLAUDE.md forces it | No |
-| "review this" / "critique this" | Auto-invokes, stays loaded | Claude may delegate here instead |
-| "review this PR" / "review the diff" | May fire | Yes — agent spawns, reviews, returns results |
-| Coding after a review happened | Yes — stays loaded from earlier | No — agent context is gone |
-| Session start (with CLAUDE.md snippet) | Yes — loaded immediately | Only when review is requested |
+If you're already in a `copilot` session, reload without restarting:
 
-## What it does
+```
+/skills reload
+```
 
-| You say | You get |
-|---|---|
-| Show code for review | Structured review: verdict + `file:line` issues + what's good |
-| "fix this" (no context) | Note about missing context + best guess + actual fix |
-| "review this PR" | Agent scans the diff, applies quality standards, returns verdict |
-| "co myślisz?" | Polish critique + Polish feedback + actual help |
-| Good code | Clear, unqualified acknowledgment |
-| "The team agreed on X" | "Show the technical argument, not the headcount." |
+### OpenCode — manual clone
+
+Personal install (available in all your projects):
+
+```bash
+git clone https://github.com/konraddzbik/critical-reviewer-skill \
+  ~/.config/opencode/skills/critical-reviewer
+```
+
+Project install (committed to a repo):
+
+```bash
+git clone https://github.com/konraddzbik/critical-reviewer-skill \
+  .opencode/skills/critical-reviewer
+```
+
+> **Note:** OpenCode also auto-discovers skills from `.claude/skills/` — clone to that path instead if you prefer unified config.
+
+---
+
+## Usage
+
+### Trigger phrases
+
+The skill activates when you say:
+- "review this", "critique this", "be direct"
+- "check this idea", "verify this solution", "is this correct"
+- "what am I missing", "does this make sense", "sanity check"
+- "co jest nie tak", "powiedz wprost", "bez ściemy", "szczera ocena"
+- Or any request for direct technical feedback
+
+### Agent usage
+
+For structured code reviews with file-level findings:
+
+- **Claude Code**: "review this PR" or "review the diff"
+- **Copilot CLI**: "review this" (agent may auto-delegate)
+- **OpenCode**: "review this code" (agent may auto-delegate)
+
+The agent reads your codebase, applies quality standards from `references/quality-standards.md`, and produces:
+
+```
+[2-3 sentence opening: the most important finding]
+
+**Verdict: [catastrophe | poor | needs-work | solid | clean]**
+
+**Issues:**
+1. `file:line` — [one sentence, specific, actionable]
+...
+
+**What's good:**
+[If anything stands out]
+
+**Summary:**
+[One sentence: what to do next]
+```
+
+---
 
 ## Verdict scale
 
@@ -134,49 +144,57 @@ This tells Claude to invoke the skill immediately, so even building and debuggin
 |---|---|---|
 | **catastrophe** | Security hole, data loss, fundamentally wrong | Stop. Do not deploy. |
 | **poor** | Broken where it matters | Fix before merge. |
-| **needs-work** | Functional but fragile | Not production-ready. |
+| **needs-work** | Works, barely, with fragile assumptions | Not production-ready. |
 | **solid** | Senior approves without comments | Ship it. |
 | **clean** | Genuinely elegant. Rare. | This is the standard. |
 
-## Plugin structure
-
-```
-critical-reviewer-skill/
-├── .claude-plugin/
-│   ├── plugin.json                  # plugin manifest
-│   └── marketplace.json             # marketplace registry
-├── skills/
-│   └── critical-reviewer/
-│       ├── SKILL.md                 # persona + communication style + quality rules
-│       └── references/
-│           └── quality-standards.md  # quality baseline (Karpathy/Marko/Pocock)
-├── agents/
-│   └── code-reviewer.md             # focused review agent (read-only)
-└── README.md
-```
-
-## Sharing with your team
-
-**Via marketplace (recommended):** Team members add the marketplace once, then install by name:
-```
-/plugin marketplace add konraddzbik/critical-reviewer-skill
-/plugin install critical-reviewer
-```
-
-**Fork (for customization):** Fork this repo, adjust skill/agent/quality-standards to your team's conventions, install from your fork URL.
+---
 
 ## Languages
 
 English and Polish. Direct technical critique in both. Language auto-detected from user input.
 
+| EN | PL |
+|---|---|
+| catastrophe | katastrofa |
+| poor | słabe |
+| needs-work | do poprawy |
+| solid | solidne |
+| clean | czyste |
+
+---
+
+## Repo structure
+
+```
+critical-reviewer-skill/
+├── .claude-plugin/                  # Claude Code plugin manifest
+│   ├── plugin.json
+│   └── marketplace.json
+├── skills/                          # Source of truth
+│   └── critical-reviewer/
+│       ├── SKILL.md                 # Skill definition
+│       └── references/
+│           └── quality-standards.md
+├── agents/                         # Agent definition
+│   └── code-reviewer.md
+└── README.md
+```
+
+The `skills/` directory is the source of truth. All platforms reference it.
+
+---
+
 ## Contributing
 
-Contributions are welcome. To get started:
+Contributions are welcome! This is an open project — anyone can fork, improve, and submit PRs.
+
+**How to contribute:**
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/your-change`)
-3. Make your changes — follow the same artifact-focused, direct style used in the skill itself
-4. Submit a pull request with a clear description of what changed and why
+3. Make your changes
+4. Submit a pull request
 
 **What makes a good PR:**
 - Changes to quality standards or anti-patterns should include a rationale
@@ -185,8 +203,8 @@ Contributions are welcome. To get started:
 
 **Issues and ideas:** Open an issue on GitHub. Bug reports, feature requests, and suggestions for new quality standards are all welcome.
 
+---
+
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
-Permission is hereby granted, free of charge, to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this software. See the LICENSE file for full terms.
+MIT. See [LICENSE](LICENSE) file.

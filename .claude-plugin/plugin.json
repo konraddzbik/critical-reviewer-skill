@@ -1,6 +1,6 @@
 {
   "name": "critical-reviewer",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Direct, artifact-focused code review and architecture critique. Opens with the most important issue first. Professional but uncompromising.",
   "author": {
     "name": "Konrad Dzbik",
