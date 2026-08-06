@@ -1,0 +1,39 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint JSON manifests
+        run: |
+          jq . .claude-plugin/plugin.json > /dev/null
+          jq . .claude-plugin/marketplace.json > /dev/null
+          echo "JSON manifests are valid."
+
+      - name: Check verdict/severity terms are consistent
+        run: |
+          # Every file that renders the scale must use the same five verdicts.
+          for term in catastrophe poor needs-work solid clean; do
+            for f in skills/critical-reviewer/SKILL.md agents/code-reviewer.md README.md; do
+              grep -q "$term" "$f" || { echo "::error file=$f::missing verdict term '$term'"; exit 1; }
+            done
+          done
+          echo "Verdict terms consistent across skill, agent, and README."
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate plugin (strict)
+        run: claude plugin validate ./ --strict

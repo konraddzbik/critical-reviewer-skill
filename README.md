@@ -126,7 +126,7 @@ The agent reads your codebase, applies quality standards from `references/qualit
 **Verdict: [catastrophe | poor | needs-work | solid | clean]**
 
 **Issues:**
-1. `file:line` — [one sentence, specific, actionable]
+1. [severity] `file:line` — [one sentence, specific, actionable]
 ...
 
 **What's good:**
@@ -135,6 +135,16 @@ The agent reads your codebase, applies quality standards from `references/qualit
 **Summary:**
 [One sentence: what to do next]
 ```
+
+Each issue is prefixed with a **severity tag** (`[catastrophe]` / `[poor]` / `[needs-work]` /
+`[solid]` / `[nit]`, or the Polish equivalents), so the list is both severity-ordered and greppable —
+a CI job can fail the build on `[catastrophe]`/`[poor]`. See [`examples.md`](skills/critical-reviewer/examples.md)
+for full worked reviews (a security catastrophe, a `clean` verdict, a Polish review, and a plan/ADR critique).
+
+### Project-level customization
+
+Drop a `.critical-reviewer.md` file in your repo and the reviewer reads it first — focus areas,
+path-scoped rules, and tone. Project context overrides the defaults.
 
 ---
 
@@ -171,13 +181,18 @@ critical-reviewer-skill/
 ├── .claude-plugin/                  # Claude Code plugin manifest
 │   ├── plugin.json
 │   └── marketplace.json
+├── .github/workflows/
+│   └── validate.yml                 # CI: claude plugin validate --strict + JSON lint
 ├── skills/                          # Source of truth
 │   └── critical-reviewer/
 │       ├── SKILL.md                 # Skill definition
+│       ├── examples.md              # Worked reviews (EN/PL, code + plan/ADR)
 │       └── references/
-│           └── quality-standards.md
+│           └── quality-standards.md # §1–6 craft + §7 Security + §8 Performance
 ├── agents/                         # Agent definition
 │   └── code-reviewer.md
+├── CHANGELOG.md
+├── CONTRIBUTING.md
 └── README.md
 ```
 
@@ -188,6 +203,8 @@ The `skills/` directory is the source of truth. All platforms reference it.
 ## Contributing
 
 Contributions are welcome! This is an open project — anyone can fork, improve, and submit PRs.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide (including how to validate locally), and
+[CHANGELOG.md](CHANGELOG.md) for release history.
 
 **How to contribute:**
 
