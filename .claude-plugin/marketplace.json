@@ -1,5 +1,6 @@
 {
   "name": "critical-reviewer-skill",
+  "description": "Direct, low-noise code review and architecture critique for Claude Code — a reviewer persona plus a read-only code-review agent, with security and performance quality standards and worked examples. English and Polish.",
   "owner": {
     "name": "Konrad Dzbik",
     "url": "https://github.com/konraddzbik"

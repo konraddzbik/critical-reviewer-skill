@@ -3,6 +3,19 @@
 These are not suggestions. These are the minimum bar for code that deserves to exist.
 Sourced from three repos that have survived production. Everything here is non-negotiable.
 
+## Contents
+
+1. [Code Quality](#1-code-quality-marko)
+2. [Think Before Coding](#2-think-before-coding-karpathy)
+3. [Simplicity First](#3-simplicity-first-karpathy)
+4. [Surgical Changes](#4-surgical-changes-karpathy)
+5. [Goal-Driven Execution](#5-goal-driven-execution-karpathy)
+6. [Architecture & Domain](#6-architecture--domain-pocock)
+7. [Security](#7-security)
+8. [Performance & Scalability](#8-performance--scalability)
+- [Verdict Scale](#verdict-scale)
+- [Quick Reference: When to apply what](#quick-reference-when-to-apply-what)
+
 ---
 
 ## 1. Code Quality (Marko)
@@ -26,7 +39,7 @@ Sourced from three repos that have survived production. Everything here is non-n
 ### Things nobody cares about
 
 - Tabs vs spaces. Configure your formatter and move on.
-- Semicolons. It's 2026. Your tooling handles this.
+- Semicolons. Your tooling handles this — configure it and stop arguing.
 - "But my way is cleaner" — your way is different. Different ≠ better. Match the existing style.
 - Personal preference masquerading as engineering critique. "I would have done it differently" is not a bug report.
 - Nits that don't affect correctness, readability, or operability. If the only complaints are nits, the code is close to solid.
@@ -132,6 +145,60 @@ Not optional. Not "nice to have." The workflow:
 
 ---
 
+## 7. Security
+
+Security bugs are the ones that end up in the incident report. Treat every one of these as at
+least `poor`, and injection / auth bypass / leaked secrets as `catastrophe`.
+
+- **Injection.** SQL, NoSQL, OS command, LDAP — any place user input reaches an interpreter as
+  code. Parameterize queries. Never build SQL or shell commands by string concatenation. `exec` on
+  a string containing user input is a finding on sight.
+- **Broken authn / authz.** The check that the *user is who they say* and the check that *they're
+  allowed to do this* are different checks — both must exist. Missing object-level authorization
+  (IDOR: `/orders/123` returns anyone's order) is the most common real-world hole.
+- **Secrets in code or logs.** API keys, tokens, passwords, connection strings in source, config,
+  or committed `.env`. Also secrets printed to logs. Rotate, move to a secret store, and gitignore.
+- **Missing / wrong input validation.** Validate at the trust boundary. Trusting `Content-Type`,
+  client-side validation only, or unbounded request bodies are all findings.
+- **SSRF.** Fetching a URL the user controls without an allowlist lets them reach your internal
+  network and cloud metadata endpoints.
+- **Path traversal.** User input in a file path (`../../etc/passwd`). Normalize and confine to a
+  known root; never join user input straight into a path.
+- **Insecure deserialization.** Deserializing untrusted data into live objects (pickle, Java
+  serialization, unsafe YAML) is remote code execution waiting to happen.
+- **Weak crypto & password handling.** Plaintext or fast-hashed (`md5`, `sha1`, unsalted)
+  passwords. Passwords need a slow KDF (argon2/bcrypt/scrypt). Don't invent crypto.
+- **Sensitive data exposure.** PII/tokens in URLs (they land in logs and referrers), overly
+  verbose error responses leaking stack traces or internal structure to clients.
+- **Missing rate limiting on auth-adjacent endpoints.** Login, password reset, and token endpoints
+  without throttling are credential-stuffing targets.
+
+---
+
+## 8. Performance & Scalability
+
+Performance problems that scale with success are the dangerous ones — they pass every test on a
+laptop and fall over the day the product works.
+
+- **N+1 queries.** A query inside a loop over query results. The query count grows linearly with
+  data. Batch it, join it, or preload it.
+- **Algorithmic complexity in hot paths.** O(n²) over a collection that grows with users. Nested
+  loops over the same growing list. It's fine at 10 rows and a fire at 100k.
+- **Unbounded memory.** Loading an entire table / file / result set into memory. Stream it, page
+  it, or cap it. "It fit in the test fixture" is not a bound.
+- **Missing indexes.** Filtering or joining on an unindexed column. Fast in dev, full table scan in
+  prod. Name the query; name the index it needs.
+- **Sync work that should be async.** Blocking the request thread on a slow external call, or doing
+  in-request work (email, image resize, report generation) that belongs on a queue.
+- **Chatty I/O.** Many small round-trips (DB, network, disk) where one batched call would do. Each
+  round-trip pays latency you can't optimize away later.
+- **No caching where the same expensive result is recomputed** every request with no invalidation
+  story — but don't add a cache before you've measured the cost. Premature caching is its own bug.
+- **Measure, don't guess.** A performance claim without a number (query count, latency, allocation)
+  is an opinion. Point at the specific line and say what it costs.
+
+---
+
 ## Verdict Scale
 
 | Verdict | Translation for people who need it spelled out |
@@ -149,7 +216,8 @@ Not optional. Not "nice to have." The workflow:
 | Situation | Apply these sections |
 |---|---|
 | Writing new code | §2 Think First → §5 Goals → §6 TDD → §3 Simplicity → §1 Quality |
-| Reviewing code | §1 Quality → §3 Simplicity → §6 Domain → Verdict |
+| Reviewing code | §1 Quality → §7 Security → §8 Performance → §3 Simplicity → §6 Domain → Verdict |
+| Reviewing anything touching auth, input, or data access | §7 Security first, always |
 | Fixing a bug | §5 Goals (reproduce first) → §6 TDD (red→green→refactor) → §4 Surgical |
 | Refactoring | §4 Surgical → §6 Commits (atomic) → §5 Goals (tests pass before AND after) |
 | Architecture decision | §2 Think First → §6 ADR → §6 Domain → §3 Simplicity |
