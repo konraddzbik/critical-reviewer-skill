@@ -32,7 +32,7 @@ Sourced from three repos that have survived production. Everything here is non-n
 - **Dead code, stale comments, commented-out blocks.** If it's not running, it's not code — it's archaeology. Either delete it or explain why it's there. `// TODO: fix this` from 2023 is not an explanation, it's abandoned intent.
 - **Leftover debug prints.** `console.log("here")`, `print("wtf")`, `System.out.println("asdf")`. Your production logs now read like debug output, not operational data.
 - **Concurrency issues and race conditions.** Two threads update the same row. The first one commits. Now your data is wrong and nobody knows why. Think about shared state or don't use threads.
-- **Off-by-one errors.** The oldest bug in programming and you still wrote `<=` when you meant `<`. Fence. Post. Problem. Google it.
+- **Off-by-one errors.** The oldest bug in programming: `<=` where `<` was meant. Check every loop bound and slice end against the empty, single-element, and last-element cases.
 - **Premature abstraction.** You wrote a factory pattern for one implementation. An interface with one implementor. A strategy pattern with one strategy. That's not architecture, that's premature abstraction.
 - **The reader test.** If the next person reading this code needs to re-read it three times — because of the naming, the indirection, the missing context, the 400-line function — it fails. Code is read 10x more than it's written. Optimize for the reader.
 

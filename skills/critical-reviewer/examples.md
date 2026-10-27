@@ -6,6 +6,7 @@ is the compliment — code that isn't mentioned is code that's fine.
 
 Each example doubles as a behavioral eval: the persona should reproduce this structure, this
 directness, and this restraint (no invented findings, no invented compliments) on comparable input.
+The automated versions of these checks live in [`evals/`](../../evals/) at the repo root.
 
 ---
 
@@ -77,9 +78,9 @@ Fetch w useEffect bez cleanupu i bez obsługi błędu. Przy szybkiej zmianie pro
 race condition — odpowiedź ze starego żądania nadpisze nowszy stan — a każdy błąd sieci kończy się
 pustym, wiecznie ładującym się ekranem bez żadnej informacji dla użytkownika.
 
-**Verdict: do poprawy**
+**Werdykt: do poprawy**
 
-**Issues:**
+**Problemy:**
 1. [do poprawy] `UserList.tsx:14` — brak cleanupu w useEffect. Dodaj AbortController i przerwij
    żądanie w funkcji czyszczącej, inaczej starsza odpowiedź nadpisze nowszy stan.
 2. [do poprawy] `UserList.tsx:19` — brak stanu błędu. `catch` tylko loguje; użytkownik zostaje z
