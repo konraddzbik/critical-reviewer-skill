@@ -24,7 +24,11 @@ jobs:
           node-version: 20
 
       - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
+        run: |
+          npm install -g @anthropic-ai/claude-code@latest
+          claude --version
+          claude plugin eval --help > /dev/null \
+            || { echo "::error::this Claude Code build has no 'plugin eval'"; exit 1; }
 
       - name: Run eval suite
         env:

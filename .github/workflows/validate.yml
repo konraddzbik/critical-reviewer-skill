@@ -49,13 +49,13 @@ jobs:
           node-version: 20
 
       - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
+        run: npm install -g @anthropic-ai/claude-code@latest
 
       - name: Validate plugin (strict)
         run: |
           claude --version
-          # --profile directory isn't offered by every CLI build (it was missing on
-          # an unauthenticated runner), so use it only when the CLI lists it.
+          # --profile directory only exists in newer CLIs (a runner once resolved
+          # 2.1.197, which lacks it), so use it only when the CLI lists it.
           if claude plugin validate --help | grep -q -- '--profile'; then
             claude plugin validate ./ --strict --profile directory
           else
