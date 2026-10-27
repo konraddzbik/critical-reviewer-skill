@@ -52,4 +52,4 @@ jobs:
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Validate plugin (strict)
-        run: claude plugin validate ./ --strict
+        run: claude plugin validate ./ --strict --profile directory

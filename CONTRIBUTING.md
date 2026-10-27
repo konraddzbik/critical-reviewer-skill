@@ -37,7 +37,7 @@ locally first:
 
 ```bash
 # Official plugin/skill/agent frontmatter + manifest validation (must be clean, no warnings)
-claude plugin validate ./ --strict
+claude plugin validate ./ --strict --profile directory
 
 # JSON manifests must parse
 jq . .claude-plugin/plugin.json .claude-plugin/marketplace.json > /dev/null
