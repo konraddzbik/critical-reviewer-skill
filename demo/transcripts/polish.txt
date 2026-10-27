@@ -1,0 +1,30 @@
+$ claude "Przejrzyj to bez ściemy: UserList.tsx"
+
+Główny problem to błędy. Gdy API zwróci 500 albo sieć padnie, komponent wypisuje błąd w konsolę i do końca
+pokazuje „Ładowanie…”. Użytkownik nie wie, że coś się zepsuło, a ty nie zobaczysz tego w monitoringu. Do
+tego przy zmianie `teamId` stara odpowiedź może nadpisać nowszą, więc pokażesz użytkowników innego zespołu.
+
+**Werdykt: słabe**
+
+**Problemy:**
+1. [słabe] `UserList.tsx:12` — `.catch((e) => console.log(e))` ukrywa błąd. `data` zostaje `null`, więc
+   spinner kręci się w nieskończoność. Dodaj stan `error` i go wyrenderuj.
+2. [słabe] `UserList.tsx:10` — brak sprawdzenia `r.ok`, a `fetch` nie rzuca wyjątku przy 4xx/5xx. Jeśli
+   backend odeśle błąd jako JSON (np. `{ "message": "Not found" }`), trafi on do `setData`, a `data.map` w
+   linii 18 rzuci `TypeError` i wywali drzewo komponentów. Rzucaj błąd, gdy `!r.ok`.
+3. [słabe] `UserList.tsx:8-13` — brak sprzątania efektu. Szybka zmiana A → B, odpowiedź A przychodzi po B i
+   nadpisuje dane. Użyj `AbortController` w cleanupie.
+4. [do poprawy] `UserList.tsx:8` — przy zmianie `teamId` dane nie są resetowane, więc w trakcie ładowania
+   lista zespołu A wisi pod zespołem B, bez żadnego wskaźnika. Ustaw `setData(null)` na starcie efektu.
+5. [do poprawy] `UserList.tsx:11` — `users` ma typ `any`, więc `User[]` to tylko deklaracja bez pokrycia.
+   Jeśli API zwróci `{ items: [...] }`, TypeScript tego nie złapie. Sprawdzaj kształt odpowiedzi w runtime
+   (minimum `Array.isArray`, lepiej zod).
+6. [nit] `UserList.tsx:9` — `teamId` trafia do URL bez `encodeURIComponent`.
+7. [nit] `UserList.tsx:16` — pusta lista renderuje pusty `<ul>`. Dodaj komunikat „Brak użytkowników”.
+
+**Dobre:** `key={u.id}` zamiast indeksu, a `teamId` jest w zależnościach efektu.
+
+[… poprawiona wersja komponentu pominięta w nagraniu …]
+
+**Podsumowanie:** Najpierw obsłuż błędy (`r.ok` i stan błędu) i dodaj `AbortController`, dopiero potem
+resztę.

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b1f2a"/>
+      <stop offset="1" stop-color="#0b0d12"/>
+    </linearGradient>
+    <linearGradient id="scale" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff4d4f"/>
+      <stop offset="0.3" stop-color="#ff8a3d"/>
+      <stop offset="0.55" stop-color="#ffc53d"/>
+      <stop offset="0.8" stop-color="#52c41a"/>
+      <stop offset="1" stop-color="#36cfc9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+  <!-- magnifier -->
+  <circle cx="450" cy="440" r="230" fill="none" stroke="#e6e8ee" stroke-width="64"/>
+  <line x1="618" y1="608" x2="820" y2="810" stroke="#e6e8ee" stroke-width="88" stroke-linecap="round"/>
+  <!-- code lines inside the lens; one flagged -->
+  <rect x="320" y="340" width="200" height="34" rx="17" fill="#5b6475"/>
+  <rect x="320" y="420" width="260" height="34" rx="17" fill="#ff4d4f"/>
+  <rect x="320" y="500" width="150" height="34" rx="17" fill="#5b6475"/>
+  <!-- verdict scale bar -->
+  <rect x="190" y="880" width="644" height="40" rx="20" fill="url(#scale)"/>
+</svg>

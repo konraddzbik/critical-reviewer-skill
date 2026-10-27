@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#161a23"/>
+      <stop offset="1" stop-color="#0b0d12"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff4d4f" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#36cfc9" stop-opacity="0.25"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="420" rx="24" fill="url(#bg)"/>
+  <rect x="0" y="414" width="1280" height="6" fill="url(#glow)"/>
+
+  <!-- window chrome -->
+  <circle cx="48" cy="44" r="8" fill="#ff5f56"/>
+  <circle cx="74" cy="44" r="8" fill="#ffbd2e"/>
+  <circle cx="100" cy="44" r="8" fill="#27c93f"/>
+  <text x="1232" y="50" text-anchor="end" font-size="16" fill="#5b6475">claude · /critical-reviewer</text>
+
+  <!-- title -->
+  <text x="64" y="150" font-size="64" font-weight="700" fill="#e6e8ee">critical<tspan fill="#ff4d4f">-</tspan>reviewer</text>
+  <text x="66" y="198" font-size="22" fill="#9aa3b5">Direct, low-noise code review for Claude Code, Copilot CLI &amp; OpenCode.</text>
+  <text x="66" y="230" font-size="22" fill="#9aa3b5">Most important finding first. Critiques the code, never the person.</text>
+
+  <!-- sample finding -->
+  <text x="66" y="292" font-size="19" fill="#5b6475">$ review src/auth.ts</text>
+  <text x="66" y="324" font-size="19" fill="#e6e8ee"><tspan font-weight="700">Verdict:</tspan> <tspan fill="#ff4d4f" font-weight="700">catastrophe</tspan></text>
+  <text x="66" y="356" font-size="19" fill="#c9cede"><tspan fill="#ff4d4f">[catastrophe]</tspan> src/auth.ts:14 — SQL built by string concatenation.</text>
+
+  <!-- verdict scale chips -->
+  <g font-size="16" font-weight="700" text-anchor="middle">
+    <rect x="884" y="268" width="156" height="34" rx="17" fill="#ff4d4f" fill-opacity="0.15" stroke="#ff4d4f"/>
+    <text x="962" y="291" fill="#ff7875">catastrophe</text>
+    <rect x="1052" y="268" width="164" height="34" rx="17" fill="#ff8a3d" fill-opacity="0.15" stroke="#ff8a3d"/>
+    <text x="1134" y="291" fill="#ffa768">poor</text>
+    <rect x="884" y="314" width="156" height="34" rx="17" fill="#ffc53d" fill-opacity="0.15" stroke="#ffc53d"/>
+    <text x="962" y="337" fill="#ffd666">needs-work</text>
+    <rect x="1052" y="314" width="164" height="34" rx="17" fill="#52c41a" fill-opacity="0.15" stroke="#52c41a"/>
+    <text x="1134" y="337" fill="#73d13d">solid</text>
+    <rect x="884" y="360" width="332" height="34" rx="17" fill="#36cfc9" fill-opacity="0.15" stroke="#36cfc9"/>
+    <text x="1050" y="383" fill="#5cdbd3">clean · rare</text>
+  </g>
+</svg>

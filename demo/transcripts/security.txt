@@ -1,0 +1,44 @@
+$ claude "Review src/auth.ts before I merge it"
+
+Line 14 builds SQL by concatenating `email` straight from the request body, and this is a full
+authentication bypass, not only a data leak. An email like `x' UNION SELECT 1, 'pw' --` paired with password
+`pw` makes line 17 pass and gets back a valid token for user `1`. The same hole also lets anyone dump the
+`users` table, which line 17 shows holds plaintext passwords. On top of that, the signing key is hardcoded
+in source (line 8), so anyone who can read the repo can mint tokens without going near the database.
+
+**Verdict: catastrophe**
+
+**Issues:**
+1. [catastrophe] `src/auth.ts:14`: SQL injection on an unauthenticated endpoint. Through `UNION SELECT`, an
+   attacker controls both `id` and `password`, so they can log in as any user. Use a parameterized query
+   instead, e.g. `db.query("SELECT id, password_hash FROM users WHERE email = $1", [email])`, with the
+   placeholder syntax your driver uses.
+2. [catastrophe] `src/auth.ts:17`: passwords are stored and compared in plaintext. A single DB leak exposes
+   every user's password, and many people reuse passwords on other sites. Store bcrypt or argon2 hashes and
+   check them with `await bcrypt.compare(password, user.password_hash)`. Existing users will need a
+   migration that rehashes on their next login or forces a reset.
+3. [catastrophe] `src/auth.ts:8`: the JWT secret `"supersecret"` is hardcoded and in git history. Anyone who
+   can read the repo can forge a token for any `sub`. Load it from env, refuse to start if it's missing, and
+   treat this value as burned. The TODO doesn't make this OK to merge.
+4. [poor] `src/auth.ts:24`: on error the handler returns `200 {}`. Clients take that as success with no
+   token, and monitoring sees no failures, so a DB outage looks like a healthy endpoint. Return `500` with a
+   generic error body.
+5. [poor] `src/auth.ts:18`: the token has no `expiresIn` and no pinned algorithm. A leaked token stays valid
+   forever and can't be revoked. Add `{ expiresIn: "15m", algorithm: "HS256" }`, or whatever lifetime fits,
+   and pin `algorithms` wherever you call `jwt.verify`.
+6. [needs-work] `src/auth.ts:12`: `email` and `password` aren't validated. A JSON body can send objects or
+   arrays, and with no type check they go straight into the query and the comparison. Check that both are
+   non-empty strings and return `400` otherwise. A zod or similar schema works well here.
+7. [needs-work] `src/auth.ts:10`: the login route has no rate limiting, so password guessing and credential
+   stuffing are free. Add per-IP and per-account throttling, e.g. `express-rate-limit`.
+8. [nit] `src/auth.ts:23`: `console.log(e)` can write query text, which contains the user's email, to
+   stdout. Use your structured logger and log the error without request data.
+
+**What's good:** Line 21 returns the same `401 invalid credentials` for an unknown email and a wrong
+password, so the endpoint doesn't reveal which emails have accounts. Keep that, but note that with bcrypt
+the unknown-email path returns faster. To fully close that timing gap, run a dummy hash compare when no user
+is found.
+
+**Summary:** Don't merge. Fix 1–3 first (parameterized query, hashed passwords, secret from env plus
+rotation), then 4–5. Also check whether this code is already deployed anywhere: if it is, assume the secret
+is compromised and that tokens may already have been forged.
