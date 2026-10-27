@@ -52,4 +52,12 @@ jobs:
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Validate plugin (strict)
-        run: claude plugin validate ./ --strict --profile directory
+        run: |
+          claude --version
+          # --profile directory isn't offered by every CLI build (it was missing on
+          # an unauthenticated runner), so use it only when the CLI lists it.
+          if claude plugin validate --help | grep -q -- '--profile'; then
+            claude plugin validate ./ --strict --profile directory
+          else
+            claude plugin validate ./ --strict
+          fi
