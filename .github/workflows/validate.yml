@@ -19,13 +19,29 @@ jobs:
 
       - name: Check verdict/severity terms are consistent
         run: |
-          # Every file that renders the scale must use the same five verdicts.
+          # Files that render the verdict scale must use the same five verdicts.
           for term in catastrophe poor needs-work solid clean; do
-            for f in skills/critical-reviewer/SKILL.md agents/code-reviewer.md README.md; do
+            for f in skills/critical-reviewer/SKILL.md skills/critical-reviewer/references/quality-standards.md README.md; do
               grep -q "$term" "$f" || { echo "::error file=$f::missing verdict term '$term'"; exit 1; }
             done
           done
-          echo "Verdict terms consistent across skill, agent, and README."
+          # The agent defers to the skill for the output contract, so it must preload it.
+          grep -qE '^\s*-\s*critical-reviewer\s*$' agents/code-reviewer.md \
+            || { echo "::error file=agents/code-reviewer.md::agent must preload the critical-reviewer skill"; exit 1; }
+          # [solid] is a verdict, never a per-issue severity tag.
+          if grep -rn '\[solid\]' skills agents README.md; then
+            echo "::error::[solid] is not a per-issue severity tag"; exit 1
+          fi
+          echo "Verdict terms and severity tags consistent."
+
+      - name: Check eval suite structure
+        run: |
+          status=0
+          for case in evals/*/; do
+            [ -f "$case/prompt.md" ] || { echo "::error file=$case::missing prompt.md"; status=1; }
+            ls "$case"graders/*.md > /dev/null 2>&1 || { echo "::error file=$case::no graders"; status=1; }
+          done
+          exit $status
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -33,7 +49,15 @@ jobs:
           node-version: 20
 
       - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
+        run: npm install -g @anthropic-ai/claude-code@latest
 
       - name: Validate plugin (strict)
-        run: claude plugin validate ./ --strict
+        run: |
+          claude --version
+          # --profile directory only exists in newer CLIs (a runner once resolved
+          # 2.1.197, which lacks it), so use it only when the CLI lists it.
+          if claude plugin validate --help | grep -q -- '--profile'; then
+            claude plugin validate ./ --strict --profile directory
+          else
+            claude plugin validate ./ --strict
+          fi

@@ -1,0 +1,28 @@
+$ claude "Sanity check src/paginate.ts before I merge"
+
+Nothing here blocks the merge. The logic is correct at every boundary I traced: empty input, a last page
+that's partly full, a page that ends exactly at the end, a cursor past the end, a negative offset, and
+`NaN`, `Infinity` or 0 as the page size. The one real design question is that the cursor is a plain offset,
+which only matters if the data can change between requests.
+
+**Verdict: solid**
+
+**Issues:**
+1. [nit] `src/paginate.ts:14`: a bad cursor quietly sends the caller back to page 1. A client that loses or
+   corrupts its cursor will reprocess every item with no error. Your test pins this behaviour on purpose, so
+   it's a choice, not a bug. Still, consider throwing (an HTTP 400 at the API layer) so client bugs show up
+   instead of causing duplicate work.
+2. [nit] `src/paginate.test.ts`: no test for a cursor past the end, e.g. `paginate(letters,
+   encodeCursor(99), 2)` returning `{ items: [], nextCursor: null }`. It works today. A one-line test would
+   catch a future change that turns it into a wrap-around or an error.
+3. [nit] `src/paginate.test.ts:25`: the malformed-cursor test only covers garbage input (decodes to `NaN`)
+   and a negative number. It doesn't cover a fractional offset like `encodeCursor(1.5)`, which is the case
+   `Number.isSafeInteger` exists to reject. Add it so that check is actually tested.
+
+**What's good:** the cursor is opaque base64url and safe in URLs. A bad page size throws instead of being
+silently changed. And `end` comes from `items.length`, not `start + pageSize`, which is why there's no extra
+empty last page.
+
+**Summary:** Merge. Only one condition: if items can be added or removed between page requests, offset
+cursors will skip or repeat items. In that case, encode the last item's sort key in the cursor instead of a
+position.

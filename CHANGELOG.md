@@ -5,6 +5,39 @@ All notable changes to this project are documented here. Versions follow the `ve
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.2.0] — 2026-10-27
+
+### Added
+- **Eval suite** (`evals/`, 8 cases) for `claude plugin eval`, run with and without the plugin:
+  security catastrophe, clean code (no manufactured findings), no-severity-inflation (calibrated, no invented bugs), severity
+  ordering, Polish end to end, plan/ADR critique, underspecified request, and a negative trigger case.
+- **`evals` workflow** — runs the live suite on demand or when a PR carries the `run-evals` label.
+- `validate` workflow now checks eval-suite structure, that the agent preloads the skill, and that
+  `[solid]` is never used as a per-issue tag.
+- **Plugin icon** (`assets/icon.png`) — clears the plugin-directory `ICON_MISSING` warning.
+- New README with header, demo GIFs (replays of real eval outputs, `demo/`), architecture diagram,
+  CI-gating recipe, `.critical-reviewer.md` example, and eval docs.
+
+### Changed
+- **Skill description** rewritten to lead with when to use it (review / critique / sanity-check code,
+  diffs, PRs, plans, pasted snippets) and to say it is not for building from scratch — the old
+  description made triggering unreliable on plain "review this" requests (1 of 2 runs in the first eval; 14/14 after).
+- **One output contract.** `SKILL.md` now defines the exact format (opening, verdict, issues, what's
+  good, summary) and the rule that the opening, verdict, and first issue agree. The agent defers to it
+  instead of keeping its own copy of the format, verdict table, and noise budget.
+- **Per-issue tags** are `[catastrophe]`, `[poor]`, `[needs-work]`, `[nit]`; `[solid]` was dropped —
+  it is a verdict, not a severity for a problem.
+- **Polish reviews are Polish end to end** — `Werdykt` / `Problemy` / `Dobre` / `Podsumowanie`.
+- The 8-step build workflow in `SKILL.md` was replaced by a short "When asked to fix or build"
+  section that points to `quality-standards.md` §2–§6, removing the contradiction with the README
+  ("writing code → normal behavior") and the "stop and ask" vs "guess loudly" conflict.
+- `code-reviewer` agent: Bash is explicitly restricted to read-only inspection.
+
+### Fixed
+- The inline example in `SKILL.md` listed a `[catastrophe]` issue last and opened with a lesser
+  problem, violating the skill's own severity-order rule.
+- A person-directed line in `quality-standards.md` ("…Google it.") replaced with actionable guidance.
+
 ## [3.1.0] — 2026-08-06
 
 ### Added

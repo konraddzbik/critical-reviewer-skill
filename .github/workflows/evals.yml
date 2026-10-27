@@ -1,0 +1,54 @@
+name: evals
+
+# Live behavioral evals cost API credits, so they run on demand or when a PR
+# carries the `run-evals` label — not on every push.
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Runs per case per arm
+        default: "2"
+  pull_request:
+    types: [labeled, synchronize]
+
+jobs:
+  evals:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'run-evals')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Claude Code
+        run: |
+          npm install -g @anthropic-ai/claude-code@latest
+          claude --version
+          claude plugin eval --help > /dev/null \
+            || { echo "::error::this Claude Code build has no 'plugin eval'"; exit 1; }
+
+      - name: Run eval suite
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude plugin eval . \
+            --trust-plugin \
+            --runs "${{ github.event.inputs.runs || '2' }}" \
+            --concurrency 4 \
+            --threshold 0.7 \
+            --max-cost-usd 15 \
+            --no-publish \
+            --report eval-report.html \
+            --json eval-results.json
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: |
+            eval-report.html
+            eval-results.json
